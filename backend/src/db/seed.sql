@@ -19,18 +19,18 @@ DO $$
 DECLARE
   r TEXT;
   n INT;
-  seat_id UUID;
+  v_seat_id UUID;
 BEGIN
   FOREACH r IN ARRAY ARRAY['A','B','C','D','E'] LOOP
     FOR n IN 1..10 LOOP
       INSERT INTO seats (theatre_id, row_label, seat_number)
       VALUES ('22222222-2222-2222-2222-222222222222', r, n)
       ON CONFLICT (theatre_id, row_label, seat_number) DO NOTHING
-      RETURNING id INTO seat_id;
+      RETURNING id INTO v_seat_id;
 
-      IF seat_id IS NOT NULL THEN
+      IF v_seat_id IS NOT NULL THEN
         INSERT INTO show_seats (showtime_id, seat_id, status)
-        VALUES ('33333333-3333-3333-3333-333333333333', seat_id, 'AVAILABLE')
+        VALUES ('33333333-3333-3333-3333-333333333333', v_seat_id, 'AVAILABLE')
         ON CONFLICT (showtime_id, seat_id) DO NOTHING;
       END IF;
     END LOOP;
