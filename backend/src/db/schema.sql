@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS payments (
 -- Idempotency ledger for gateway callbacks. event_id is the dedup key.
 CREATE TABLE IF NOT EXISTS payment_events (
   event_id TEXT PRIMARY KEY,
-  payment_id UUID REFERENCES payments(id),
+  gateway_payment_id TEXT,
   status TEXT NOT NULL,
   raw_payload JSONB,
   received_at TIMESTAMPTZ NOT NULL DEFAULT now()

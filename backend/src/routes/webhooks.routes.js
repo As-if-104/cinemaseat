@@ -14,7 +14,7 @@ router.post("/payment", verifySignature, async (req, res) => {
     // IDEMPOTENCY CHECK: event_id is PRIMARY KEY on payment_events.
     // ON CONFLICT DO NOTHING means a duplicate delivery becomes a no-op.
     const inserted = await client.query(
-      `INSERT INTO payment_events (event_id, payment_id, status, raw_payload)
+      `INSERT INTO payment_events (event_id, gateway_payment_id, status, raw_payload)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (event_id) DO NOTHING
        RETURNING event_id`,
