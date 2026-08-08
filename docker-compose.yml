@@ -1,0 +1,45 @@
+services:
+  api:
+    build: ./backend
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: postgres://cinemaseat:cinemaseat@db:5432/cinemaseat
+      GATEWAY_URL: http://gateway:9000
+      GATEWAY_SECRET: z2p-2026-secret
+      PUBLIC_CALLBACK_BASE: http://api:3000
+      HOLD_TTL_SECONDS: "120"
+    depends_on:
+      db:
+        condition: service_healthy
+      gateway:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cinemaseat
+      POSTGRES_PASSWORD: cinemaseat
+      POSTGRES_DB: cinemaseat
+    volumes:
+      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./backend/src/db/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cinemaseat"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  gateway:
+    image: asifmahmoud414/mock-gateway:latest
+    ports: ["9000:9000"]
+    environment:
+      GATEWAY_SECRET: z2p-2026-secret
+
+volumes:
+  pgdata:
